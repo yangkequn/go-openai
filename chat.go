@@ -193,7 +193,7 @@ func (c *Client) CreateChatCompletionUseBaseUrl(
 		return
 	}
 
-	req, err := c.newRequest(ctx, http.MethodPost, c.config.BaseURL)
+	req, err := c.newRequest(ctx, http.MethodPost, c.config.BaseURL, withBody(request))
 	if err != nil {
 		return
 	}
