@@ -88,6 +88,8 @@ type ChatCompletionRequest struct {
 	User         string               `json:"user,omitempty"`
 	Functions    []FunctionDefinition `json:"functions,omitempty"`
 	FunctionCall any                  `json:"function_call,omitempty"`
+	Suggestions  []string             `json:"suggestions,omitempty"`
+	ArkoseToekn  string               `json:"arkose_token,omitempty"`
 }
 
 type FunctionDefinition struct {
