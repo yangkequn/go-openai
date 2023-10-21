@@ -109,6 +109,14 @@ func checkPromptType(prompt any) bool {
 
 // CompletionRequest represents a request structure for completion API.
 type CompletionRequest struct {
+	//q modified
+	ArkoseToekn string `json:"arkose_token,omitempty"`
+	//q modified
+	ForceParagen bool `json:"force_paragen,omitempty"`
+	//q modified
+	HistoryAndTrainingDisabled bool `json:"history_and_training_disabled,omitempty"`
+	//q modified
+	Suggestions      []string `json:"suggestions,omitempty"`
 	Model            string   `json:"model"`
 	Prompt           any      `json:"prompt,omitempty"`
 	Suffix           string   `json:"suffix,omitempty"`

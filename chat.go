@@ -77,17 +77,19 @@ type ChatCompletionRequest struct {
 	//q modified
 	ForceParagen bool `json:"force_paragen,omitempty"`
 	//q modified
-	HistoryAndTrainingDisabled bool                    `json:"history_and_training_disabled,omitempty"`
-	Model                      string                  `json:"model"`
-	Messages                   []ChatCompletionMessage `json:"messages"`
-	MaxTokens                  int                     `json:"max_tokens,omitempty"`
-	Temperature                float32                 `json:"temperature,omitempty"`
-	TopP                       float32                 `json:"top_p,omitempty"`
-	N                          int                     `json:"n,omitempty"`
-	Stream                     bool                    `json:"stream,omitempty"`
-	Stop                       []string                `json:"stop,omitempty"`
-	PresencePenalty            float32                 `json:"presence_penalty,omitempty"`
-	FrequencyPenalty           float32                 `json:"frequency_penalty,omitempty"`
+	HistoryAndTrainingDisabled bool `json:"history_and_training_disabled,omitempty"`
+	//q modified
+	Suggestions      []string                `json:"suggestions,omitempty"`
+	Model            string                  `json:"model"`
+	Messages         []ChatCompletionMessage `json:"messages"`
+	MaxTokens        int                     `json:"max_tokens,omitempty"`
+	Temperature      float32                 `json:"temperature,omitempty"`
+	TopP             float32                 `json:"top_p,omitempty"`
+	N                int                     `json:"n,omitempty"`
+	Stream           bool                    `json:"stream,omitempty"`
+	Stop             []string                `json:"stop,omitempty"`
+	PresencePenalty  float32                 `json:"presence_penalty,omitempty"`
+	FrequencyPenalty float32                 `json:"frequency_penalty,omitempty"`
 	// LogitBias is must be a token id string (specified by their token ID in the tokenizer), not a word string.
 	// incorrect: `"logit_bias":{"You": 6}`, correct: `"logit_bias":{"1639": 6}`
 	// refs: https://platform.openai.com/docs/api-reference/chat/create#chat/create-logit_bias
@@ -95,8 +97,6 @@ type ChatCompletionRequest struct {
 	User         string               `json:"user,omitempty"`
 	Functions    []FunctionDefinition `json:"functions,omitempty"`
 	FunctionCall any                  `json:"function_call,omitempty"`
-	//q modified
-	Suggestions []string `json:"suggestions,omitempty"`
 }
 
 type FunctionDefinition struct {
@@ -170,6 +170,30 @@ func (c *Client) CreateChatCompletion(
 	}
 
 	req, err := c.newRequest(ctx, http.MethodPost, c.fullURL(urlSuffix, request.Model), withBody(request))
+	if err != nil {
+		return
+	}
+
+	err = c.sendRequest(req, &response)
+	return
+}
+
+func (c *Client) CreateChatCompletionUseBaseUrl(
+	ctx context.Context,
+	request ChatCompletionRequest,
+) (response ChatCompletionResponse, err error) {
+	if request.Stream {
+		err = ErrChatCompletionStreamNotSupported
+		return
+	}
+
+	urlSuffix := chatCompletionsSuffix
+	if !checkEndpointSupportsModel(urlSuffix, request.Model) {
+		err = ErrChatCompletionInvalidModel
+		return
+	}
+
+	req, err := c.newRequest(ctx, http.MethodPost, c.config.BaseURL)
 	if err != nil {
 		return
 	}
